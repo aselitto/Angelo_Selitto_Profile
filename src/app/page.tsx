@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useState, useEffect } from 'react'
+import { useState, useEffect, createContext, useContext } from 'react'
 import {
   ReactFlow,
   Node,
@@ -15,10 +15,50 @@ import {
 import '@xyflow/react/dist/style.css'
 import Image from 'next/image'
 
+// ============ GYROSCOPE CONTEXT ============
+const GyroContext = createContext({ x: 0, y: 0 })
+
+function useGyro() {
+  return useContext(GyroContext)
+}
+
+// ============ METALLIC CARD WRAPPER ============
+function MetallicCard({ children, className, borderColor }: { 
+  children: React.ReactNode
+  className?: string
+  borderColor: string
+}) {
+  const gyro = useGyro()
+  
+  // Calculate shine position based on gyro
+  const shineX = 50 + gyro.x * 3
+  const shineY = 50 + gyro.y * 3
+  
+  return (
+    <div 
+      className={`relative overflow-hidden ${className}`}
+      style={{
+        transform: `perspective(1000px) rotateX(${gyro.y * 0.5}deg) rotateY(${gyro.x * 0.5}deg)`,
+        transition: 'transform 150ms ease-out'
+      }}
+    >
+      {/* Metallic shine overlay */}
+      <div 
+        className="absolute inset-0 pointer-events-none z-10"
+        style={{
+          background: `radial-gradient(ellipse 80% 50% at ${shineX}% ${shineY}%, rgba(255,255,255,0.15) 0%, transparent 50%)`,
+          transition: 'background 150ms ease-out'
+        }}
+      />
+      {children}
+    </div>
+  )
+}
+
 // ============ PROFILE NODE ============
 function ProfileNode({ data }: NodeProps) {
   return (
-    <div className="bg-zinc-950 border-3 border-cyan-500 rounded-3xl w-[520px] shadow-2xl shadow-cyan-500/30 overflow-hidden animate-border-cyan">
+    <MetallicCard className="bg-zinc-950 border-3 border-cyan-500 rounded-3xl w-[520px] shadow-2xl shadow-cyan-500/30 animate-border-cyan" borderColor="cyan">
       <div className="p-8">
         <div className="flex items-start gap-6">
           <Image
@@ -51,7 +91,7 @@ function ProfileNode({ data }: NodeProps) {
           </a>
         </div>
       </div>
-    </div>
+    </MetallicCard>
   )
 }
 
@@ -108,7 +148,7 @@ function ProjectNode({ data }: { data: ProjectData }) {
   const [showDemo, setShowDemo] = useState(true)
   
   return (
-    <div className="bg-zinc-950 border-2 border-pink-500 rounded-2xl w-[900px] shadow-2xl shadow-pink-500/20 overflow-hidden animate-border-pink">
+    <MetallicCard className="bg-zinc-950 border-2 border-pink-500 rounded-2xl w-[900px] shadow-2xl shadow-pink-500/20 animate-border-pink" borderColor="pink">
       <div className="p-4 flex items-center justify-between">
         <div>
           <h3 className="text-xl font-bold text-white">{data.name}</h3>
@@ -159,7 +199,7 @@ function ProjectNode({ data }: { data: ProjectData }) {
           )}
         </div>
       )}
-    </div>
+    </MetallicCard>
   )
 }
 
@@ -184,7 +224,7 @@ function SkillsNode({ data }: NodeProps) {
   ]
 
   return (
-    <div className="bg-zinc-950 border-2 border-emerald-500 rounded-2xl w-[380px] shadow-2xl shadow-emerald-500/20 animate-border-emerald">
+    <MetallicCard className="bg-zinc-950 border-2 border-emerald-500 rounded-2xl w-[380px] shadow-2xl shadow-emerald-500/20 animate-border-emerald" borderColor="emerald">
       <div className="p-4 border-b border-emerald-500/30">
         <h2 className="text-lg font-bold text-white">Technical Core</h2>
         <p className="text-zinc-500 text-xs">25+ years across enterprise systems, healthcare IT, and applied AI</p>
@@ -204,7 +244,7 @@ function SkillsNode({ data }: NodeProps) {
           </div>
         ))}
       </div>
-    </div>
+    </MetallicCard>
   )
 }
 
@@ -266,7 +306,7 @@ function StoryNode({ data }: NodeProps) {
 // ============ LOOKING FOR NODE ============
 function LookingForNode({ data }: NodeProps) {
   return (
-    <div className="bg-zinc-950 border-2 border-teal-500 rounded-2xl w-[340px] shadow-2xl shadow-teal-500/20 animate-border-teal">
+    <MetallicCard className="bg-zinc-950 border-2 border-teal-500 rounded-2xl w-[340px] shadow-2xl shadow-teal-500/20 animate-border-teal" borderColor="teal">
       <div className="p-4 border-b border-teal-500/30">
         <h2 className="text-lg font-bold text-white">What I'm Looking For</h2>
       </div>
@@ -316,7 +356,7 @@ function LookingForNode({ data }: NodeProps) {
           If you're hiring for any of the above, I'm happy to talk.
         </p>
       </div>
-    </div>
+    </MetallicCard>
   )
 }
 
@@ -515,8 +555,8 @@ export default function SpatialResume() {
   // Detect mobile for disabling node drag
   const [isMobile, setIsMobile] = useState(false)
   
-  // Gyroscope tilt effect for mobile
-  const [tilt, setTilt] = useState({ x: 0, y: 0 })
+  // Gyroscope state for individual cards
+  const [gyro, setGyro] = useState({ x: 0, y: 0 })
   
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 768)
@@ -525,27 +565,22 @@ export default function SpatialResume() {
     return () => window.removeEventListener('resize', checkMobile)
   }, [])
   
+  // Gyroscope listener
   useEffect(() => {
-    if (!isMobile) return
-    
     const handleOrientation = (e: DeviceOrientationEvent) => {
-      const x = Math.max(-15, Math.min(15, (e.gamma || 0) * 0.3))
-      const y = Math.max(-15, Math.min(15, (e.beta || 0) * 0.3 - 10))
-      setTilt({ x, y })
+      const x = Math.max(-15, Math.min(15, (e.gamma || 0) * 0.5))
+      const y = Math.max(-15, Math.min(15, (e.beta || 0) * 0.5 - 15))
+      setGyro({ x, y })
     }
     
     window.addEventListener('deviceorientation', handleOrientation)
     return () => window.removeEventListener('deviceorientation', handleOrientation)
-  }, [isMobile])
+  }, [])
 
   return (
-    <div 
-      className="w-screen h-screen bg-black transition-transform duration-150 ease-out"
-      style={{ 
-        transform: isMobile ? `perspective(1000px) rotateX(${tilt.y}deg) rotateY(${tilt.x}deg)` : 'none'
-      }}
-    >
-      <ReactFlow
+    <GyroContext.Provider value={gyro}>
+      <div className="w-screen h-screen bg-black">
+        <ReactFlow
         nodes={nodes}
         edges={edges}
         nodeTypes={nodeTypes}
@@ -573,12 +608,13 @@ export default function SpatialResume() {
         />
       </ReactFlow>
       
-      {/* Floating Header */}
-      <div className="absolute top-4 left-1/2 -translate-x-1/2 z-50 text-center">
-        <div className="bg-zinc-950/80 backdrop-blur-sm border border-zinc-800 rounded-full px-4 py-2">
-          <span className="text-zinc-400 text-xs md:text-sm">Pinch to zoom • Drag to pan</span>
+        {/* Floating Header */}
+        <div className="absolute top-4 left-1/2 -translate-x-1/2 z-50 text-center">
+          <div className="bg-zinc-950/80 backdrop-blur-sm border border-zinc-800 rounded-full px-4 py-2">
+            <span className="text-zinc-400 text-xs md:text-sm">Pinch to zoom • Drag to pan</span>
+          </div>
         </div>
       </div>
-    </div>
+    </GyroContext.Provider>
   )
 }
