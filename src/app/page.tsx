@@ -29,18 +29,36 @@ function MetallicCard({ children, className, borderColor }: {
   borderColor: string
 }) {
   const gyro = useGyro()
+  const [mousePos, setMousePos] = useState({ x: 0, y: 0, active: false })
   
-  // Calculate shine position based on gyro
-  const shineX = 50 + gyro.x * 3
-  const shineY = 50 + gyro.y * 3
+  // Use mouse position on desktop, gyro on mobile
+  const tiltX = mousePos.active ? mousePos.x : gyro.x
+  const tiltY = mousePos.active ? mousePos.y : gyro.y
+  
+  // Calculate shine position
+  const shineX = 50 + tiltX * 3
+  const shineY = 50 + tiltY * 3
+  
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect()
+    const x = ((e.clientX - rect.left) / rect.width - 0.5) * 20
+    const y = ((e.clientY - rect.top) / rect.height - 0.5) * 20
+    setMousePos({ x, y, active: true })
+  }
+  
+  const handleMouseLeave = () => {
+    setMousePos({ x: 0, y: 0, active: false })
+  }
   
   return (
     <div 
       className={`relative overflow-hidden ${className}`}
       style={{
-        transform: `perspective(1000px) rotateX(${gyro.y * 0.5}deg) rotateY(${gyro.x * 0.5}deg)`,
+        transform: `perspective(1000px) rotateX(${-tiltY * 0.5}deg) rotateY(${tiltX * 0.5}deg)`,
         transition: 'transform 150ms ease-out'
       }}
+      onMouseMove={handleMouseMove}
+      onMouseLeave={handleMouseLeave}
     >
       {/* Metallic shine overlay */}
       <div 
@@ -277,8 +295,8 @@ function CertsNode({ data }: NodeProps) {
 // ============ STORY NODE ============
 function StoryNode({ data }: NodeProps) {
   return (
-    <div className="bg-zinc-950 border-2 border-zinc-700 rounded-2xl w-[400px] shadow-2xl">
-      <div className="p-4 border-b border-zinc-700">
+    <MetallicCard className="bg-zinc-950 border-2 border-cyan-500 rounded-2xl w-[400px] shadow-2xl shadow-cyan-500/20 animate-border-cyan" borderColor="cyan">
+      <div className="p-4 border-b border-cyan-500/30">
         <h2 className="text-lg font-bold text-white">The "IRC to AI" Origin Story</h2>
       </div>
       <div className="p-4">
@@ -299,7 +317,7 @@ function StoryNode({ data }: NodeProps) {
           Today, I apply that same 'packet-level' skepticism to LLMs. I don't trust a probabilistic LLM to write a legal contract without a deterministic guardrail."
         </p>
       </div>
-    </div>
+    </MetallicCard>
   )
 }
 
