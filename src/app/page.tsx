@@ -439,11 +439,11 @@ const initialNodes: Node[] = [
     position: { x: 989, y: 822 },
     data: {
       name: 'ResidStream',
-      tech: 'Observability',
-      description: 'Real-time observability for AI residuals in healthcare systems. Performance monitoring for high-stakes environments.',
+      tech: 'Logit Lens + 3D',
+      description: 'Navigable 3D environment for exploring GPT-2 residual streams. Visualize attention heads, induction circuits, and token competition in real-time.',
       url: 'https://aselitto.github.io/ResidStream/',
       demoUrl: 'https://aselitto.github.io/ResidStream/',
-      demoCaption: 'Right-click to pan/look around the 3D visualization'
+      demoCaption: 'Right-click to pan/look around • Try the Harry Potter induction head preset'
     }
   },
   {
@@ -532,8 +532,7 @@ export default function SpatialResume() {
         nodeTypes={nodeTypes}
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}
-        fitView
-        fitViewOptions={{ padding: 0.2 }}
+        defaultViewport={{ x: 150, y: 50, zoom: 0.6 }}
         minZoom={0.05}
         maxZoom={4}
         zoomOnScroll={true}
@@ -557,14 +556,8 @@ export default function SpatialResume() {
       
       {/* Floating Header */}
       <div className="absolute top-4 left-1/2 -translate-x-1/2 z-50 text-center">
-        <div className="bg-zinc-950/80 backdrop-blur-sm border border-zinc-800 rounded-full px-6 py-2 flex items-center gap-4">
-          <span className="text-zinc-400 text-sm">Pan & zoom to explore • Drag nodes to rearrange</span>
-          <button 
-            onClick={exportPositions}
-            className="px-3 py-1 bg-cyan-600 hover:bg-cyan-500 rounded-full text-xs font-medium text-white transition-colors"
-          >
-            Export Positions
-          </button>
+        <div className="bg-zinc-950/80 backdrop-blur-sm border border-zinc-800 rounded-full px-4 py-2">
+          <span className="text-zinc-400 text-xs md:text-sm">Pinch to zoom • Drag to pan</span>
         </div>
       </div>
     </div>
