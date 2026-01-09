@@ -114,7 +114,7 @@ function EraNode({ data }: { data: EraData }) {
   const c = colors[data.theme] || colors.ai
 
   return (
-    <div className={`bg-zinc-950 border-2 ${c.border} rounded-2xl w-[340px] shadow-2xl ${c.glow}`}>
+    <MetallicCard className={`bg-zinc-950 border-2 ${c.border} rounded-2xl w-[340px] shadow-2xl ${c.glow}`} borderColor={data.theme}>
       <div className={`bg-gradient-to-br ${c.bg} to-zinc-900 p-5 rounded-t-xl border-b ${c.border}/30`}>
         <div className={`text-[10px] ${c.text} uppercase tracking-wider mb-1`}>{data.years}</div>
         <h2 className="text-xl font-bold text-white">{data.title}</h2>
@@ -129,7 +129,7 @@ function EraNode({ data }: { data: EraData }) {
           </div>
         ))}
       </div>
-    </div>
+    </MetallicCard>
   )
 }
 
@@ -148,7 +148,7 @@ function ProjectNode({ data }: { data: ProjectData }) {
   const [showDemo, setShowDemo] = useState(true)
   
   return (
-    <MetallicCard className="bg-zinc-950 border-2 border-pink-500 rounded-2xl w-[900px] shadow-2xl shadow-pink-500/20 animate-border-pink" borderColor="pink">
+    <div className="bg-zinc-950 border-2 border-pink-500 rounded-2xl w-[900px] shadow-2xl shadow-pink-500/20 overflow-hidden animate-border-pink">
       <div className="p-4 flex items-center justify-between">
         <div>
           <h3 className="text-xl font-bold text-white">{data.name}</h3>
@@ -199,7 +199,7 @@ function ProjectNode({ data }: { data: ProjectData }) {
           )}
         </div>
       )}
-    </MetallicCard>
+    </div>
   )
 }
 
@@ -258,7 +258,7 @@ function CertsNode({ data }: NodeProps) {
   ]
 
   return (
-    <div className="bg-zinc-950/80 border border-zinc-700 rounded-xl w-[280px] shadow-lg">
+    <MetallicCard className="bg-zinc-950/80 border border-zinc-700 rounded-xl w-[280px] shadow-lg" borderColor="zinc">
       <div className="p-3 border-b border-zinc-800">
         <h2 className="text-sm font-medium text-zinc-400">Credentials & Compliance Readiness</h2>
       </div>
@@ -270,7 +270,7 @@ function CertsNode({ data }: NodeProps) {
           </div>
         ))}
       </div>
-    </div>
+    </MetallicCard>
   )
 }
 
