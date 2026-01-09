@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useState } from 'react'
+import { useCallback, useState, useEffect } from 'react'
 import {
   ReactFlow,
   Node,
@@ -511,18 +511,16 @@ const initialEdges: Edge[] = [
 export default function SpatialResume() {
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes)
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges)
-
-  const exportPositions = () => {
-    const positions = nodes.map(node => ({
-      id: node.id,
-      x: Math.round(node.position.x),
-      y: Math.round(node.position.y)
-    }))
-    console.log('NODE POSITIONS:')
-    console.log(JSON.stringify(positions, null, 2))
-    navigator.clipboard.writeText(JSON.stringify(positions, null, 2))
-    alert('Node positions copied to clipboard! Check console too.')
-  }
+  
+  // Detect mobile for disabling node drag
+  const [isMobile, setIsMobile] = useState(false)
+  
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768)
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
+    return () => window.removeEventListener('resize', checkMobile)
+  }, [])
 
   return (
     <div className="w-screen h-screen bg-black">
@@ -532,13 +530,13 @@ export default function SpatialResume() {
         nodeTypes={nodeTypes}
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}
-        defaultViewport={{ x: 150, y: 50, zoom: 0.6 }}
+        defaultViewport={{ x: 250, y: 50, zoom: 0.6 }}
         minZoom={0.05}
         maxZoom={4}
         zoomOnScroll={true}
         zoomOnPinch={true}
         panOnDrag={true}
-        nodesDraggable={true}
+        nodesDraggable={!isMobile}
       >
         <Background color="#27272a" gap={30} />
         <Controls className="!bg-zinc-900 !border-zinc-700 !rounded-xl overflow-hidden [&>button]:!bg-zinc-800 [&>button]:!border-zinc-700 [&>button:hover]:!bg-zinc-700" />
