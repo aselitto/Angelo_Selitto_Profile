@@ -530,7 +530,7 @@ export default function SpatialResume() {
         nodeTypes={nodeTypes}
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}
-        defaultViewport={{ x: 250, y: 50, zoom: 0.6 }}
+        defaultViewport={{ x: 50, y: 50, zoom: 0.6 }}
         minZoom={0.05}
         maxZoom={4}
         zoomOnScroll={true}
