@@ -18,7 +18,7 @@ import Image from 'next/image'
 // ============ PROFILE NODE ============
 function ProfileNode({ data }: NodeProps) {
   return (
-    <div className="bg-zinc-950 border-3 border-cyan-500 rounded-3xl w-[520px] shadow-2xl shadow-cyan-500/30 overflow-hidden">
+    <div className="bg-zinc-950 border-3 border-cyan-500 rounded-3xl w-[520px] shadow-2xl shadow-cyan-500/30 overflow-hidden animate-border-cyan">
       <div className="p-8">
         <div className="flex items-start gap-6">
           <Image
@@ -108,7 +108,7 @@ function ProjectNode({ data }: { data: ProjectData }) {
   const [showDemo, setShowDemo] = useState(true)
   
   return (
-    <div className="bg-zinc-950 border-2 border-pink-500 rounded-2xl w-[900px] shadow-2xl shadow-pink-500/20 overflow-hidden">
+    <div className="bg-zinc-950 border-2 border-pink-500 rounded-2xl w-[900px] shadow-2xl shadow-pink-500/20 overflow-hidden animate-border-pink">
       <div className="p-4 flex items-center justify-between">
         <div>
           <h3 className="text-xl font-bold text-white">{data.name}</h3>
@@ -184,7 +184,7 @@ function SkillsNode({ data }: NodeProps) {
   ]
 
   return (
-    <div className="bg-zinc-950 border-2 border-emerald-500 rounded-2xl w-[380px] shadow-2xl shadow-emerald-500/20">
+    <div className="bg-zinc-950 border-2 border-emerald-500 rounded-2xl w-[380px] shadow-2xl shadow-emerald-500/20 animate-border-emerald">
       <div className="p-4 border-b border-emerald-500/30">
         <h2 className="text-lg font-bold text-white">Technical Core</h2>
         <p className="text-zinc-500 text-xs">25+ years across enterprise systems, healthcare IT, and applied AI</p>
@@ -266,7 +266,7 @@ function StoryNode({ data }: NodeProps) {
 // ============ LOOKING FOR NODE ============
 function LookingForNode({ data }: NodeProps) {
   return (
-    <div className="bg-zinc-950 border-2 border-teal-500 rounded-2xl w-[340px] shadow-2xl shadow-teal-500/20">
+    <div className="bg-zinc-950 border-2 border-teal-500 rounded-2xl w-[340px] shadow-2xl shadow-teal-500/20 animate-border-teal">
       <div className="p-4 border-b border-teal-500/30">
         <h2 className="text-lg font-bold text-white">What I'm Looking For</h2>
       </div>
@@ -515,15 +515,36 @@ export default function SpatialResume() {
   // Detect mobile for disabling node drag
   const [isMobile, setIsMobile] = useState(false)
   
+  // Gyroscope tilt effect for mobile
+  const [tilt, setTilt] = useState({ x: 0, y: 0 })
+  
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 768)
     checkMobile()
     window.addEventListener('resize', checkMobile)
     return () => window.removeEventListener('resize', checkMobile)
   }, [])
+  
+  useEffect(() => {
+    if (!isMobile) return
+    
+    const handleOrientation = (e: DeviceOrientationEvent) => {
+      const x = Math.max(-15, Math.min(15, (e.gamma || 0) * 0.3))
+      const y = Math.max(-15, Math.min(15, (e.beta || 0) * 0.3 - 10))
+      setTilt({ x, y })
+    }
+    
+    window.addEventListener('deviceorientation', handleOrientation)
+    return () => window.removeEventListener('deviceorientation', handleOrientation)
+  }, [isMobile])
 
   return (
-    <div className="w-screen h-screen bg-black">
+    <div 
+      className="w-screen h-screen bg-black transition-transform duration-150 ease-out"
+      style={{ 
+        transform: isMobile ? `perspective(1000px) rotateX(${tilt.y}deg) rotateY(${tilt.x}deg)` : 'none'
+      }}
+    >
       <ReactFlow
         nodes={nodes}
         edges={edges}
